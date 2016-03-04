@@ -1,0 +1,18 @@
+---
+- hosts:
+  - k2k-idp
+  - k2k-sp
+  user: ubuntu
+  roles:
+    - devstack
+    - federation-common
+
+- hosts: k2k-idp
+  user: ubuntu
+  roles:
+    - federation-idp
+
+- hosts: k2k-sp
+  user: ubuntu
+  roles:
+    - federation-sp

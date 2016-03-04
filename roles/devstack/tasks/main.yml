@@ -1,0 +1,46 @@
+---
+- name: Update apt-get cache
+  apt: update_cache=yes
+  become: yes
+  when: ansible_distribution == 'Ubuntu'
+
+- name: Install git
+  package: name=git state=present
+  become: yes
+
+- name: Clone DevStack
+  git:
+    repo=https://git.openstack.org/openstack-dev/devstack
+    dest=devstack
+    version=stable/liberty
+    update=no
+  register: clone_devstack
+
+- name: Copy local.conf configuration
+  template:
+    src=local.conf.j2
+    dest=devstack/local.conf
+  when: clone_devstack.changed
+
+- name: Run stack.sh
+  shell: devstack/stack.sh
+  when: clone_devstack.changed
+
+- name: Copy admin file
+  shell: cp devstack/accrc/admin/admin admin
+  when: clone_devstack.changed
+
+- name: Modify RC file
+  script: roles/devstack/scripts/modify_rcfile.sh
+  when: clone_devstack.changed
+
+- name: PKI Setup
+  shell: keystone-manage pki_setup --keystone-user {{ ansible_user_id }} --keystone-group {{ ansible_user_id }}
+  become: yes
+  when: clone_devstack.changed
+
+#FIXME Use file module with owner
+- name: Chown SSL
+  shell: chown -R {{ ansible_user_id }}:{{ ansible_user_id }} /etc/keystone/ssl
+  become: yes
+  when: clone_devstack.changed

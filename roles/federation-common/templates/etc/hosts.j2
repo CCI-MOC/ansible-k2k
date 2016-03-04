@@ -1,0 +1,13 @@
+# {{ ansible_managed }}
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+
+# Identity Providers
+{% for idp in groups['k2k-idp'] %}
+{{ hostvars[idp]['ansible_eth0']['ipv4']['address'] }}  {{ hostvars[idp]['ansible_hostname'] }}
+{% endfor %}
+
+# Service Providers
+{% for sp in groups['k2k-sp'] %}
+{{ hostvars[sp]['ansible_eth0']['ipv4']['address'] }}  {{ hostvars[sp]['ansible_hostname'] }}
+{% endfor %}

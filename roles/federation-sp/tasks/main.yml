@@ -1,0 +1,49 @@
+---
+- name: Install dependencies
+  package: name={{ item }} state=present
+  with_items:
+   - libxml2-dev
+   - libxslt-dev
+   - python-dev
+
+- name: Install python packages
+  pip: name=lxml state=present
+
+- name: Install shibboleth
+  package: name=libapache2-mod-shib2 state=present
+  become: yes
+  register: shib
+
+- name: Configure apache
+  script: roles/federation-sp/scripts/configure_apache.py
+  become: yes
+  when: shib.changed
+
+#FIXME: For now we can have only one IdP for each SP
+- name: Configure shibboleth
+  script: roles/federation-sp/scripts/configure_shibboleth.py
+  become: yes
+  when: shib.changed
+
+- name: Shib-Keygen
+  shell: shib-keygen -f
+  become: yes
+  when: shib.changed
+
+- name: Configure Nova
+  script: roles/federation-sp/scripts/configure_nova.py
+
+- name: Configure Keystone
+  script: roles/federation-sp/scripts/configure_keystone.py
+
+- name: Restart shibd
+  service: name=shibd state=restarted
+
+- name: Restart apache2
+  service: name=apache2 state=restarted
+
+- name: Register identity providers
+  script: roles/federation-sp/scripts/register_identity_providers.py
+  when: shib.changed
+
+

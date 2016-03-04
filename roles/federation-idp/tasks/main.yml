@@ -1,0 +1,13 @@
+---
+- name: Insert SAML config in keystone.conf
+  script: roles/federation-idp/scripts/configure_keystone.py {{ ansible_eth0['ipv4']['address'] }}
+
+- name: Create IDP metadata
+  shell: keystone-manage saml_idp_metadata > /etc/keystone/keystone_idp_metadata.xml
+    creates=/etc/keystone/keystone_idp_metadata.xml
+
+- name: Restart apache2
+  service: name=apache2 state=restarted
+
+- name: Script register SPs
+  script: roles/federation-idp/scripts/register_service_providers.py

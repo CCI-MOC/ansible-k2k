@@ -1,0 +1,22 @@
+---
+- debug: msg="Gather info before Generating Hosts file."
+
+- name: Generate /etc/hosts file
+  template:
+    src=etc/hosts.j2
+    dest=/etc/hosts
+  become: yes
+
+- name: Install xmlsec1
+  package: name=xmlsec1 state=present
+  become: yes
+
+- name: Install pysaml2, configparser, python-hosts
+  pip: name={{ item }}
+  with_items:
+   - pysaml2
+   - configparser
+   - python-hosts
+   - keystoneauth1
+  become: yes
+
