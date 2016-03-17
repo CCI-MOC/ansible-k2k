@@ -1,14 +1,28 @@
 ---
 - debug: msg="Gather info before Generating Hosts file."
 
+- shell: echo "{{ ansible_eth0['ipv4']['address'] }}"
+
 - name: Generate /etc/hosts file
   template:
     src=etc/hosts.j2
     dest=/etc/hosts
   become: yes
 
-- name: Install xmlsec1
-  package: name=xmlsec1 state=present
+# IF CentOS / RHEL
+- name: install epel-release CentOS/RHEL
+  yum:
+    name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+    state=present
+  become: yes
+  when: ansible_os_family == 'RedHat'
+# END If Centos
+
+- name: Install xmlsec1, pip
+  package: name={{ item }} state=present
+  with_items:
+   - xmlsec1
+   - python-pip
   become: yes
 
 - name: Install pysaml2, configparser, python-hosts

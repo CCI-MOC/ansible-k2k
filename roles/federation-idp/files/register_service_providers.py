@@ -14,7 +14,7 @@ import keystoneauth1.exceptions.http
 
 # Source environment variables from file
 # http://stackoverflow.com/questions/3503719/emulating-bash-source-in-python
-command = ['bash', '-c', 'source /home/ubuntu/admin && env']
+command = ['bash', '-c', 'source ~/admin && env']
 proc = subprocess.Popen(command, stdout = subprocess.PIPE)
 for line in proc.stdout:
   (key, _, value) = line.partition("=")

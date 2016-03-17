@@ -1,49 +1,102 @@
 ---
+# IF Ubuntu
 - name: Install dependencies
   package: name={{ item }} state=present
   with_items:
    - libxml2-dev
    - libxslt-dev
    - python-dev
+  when: ansible_distribution == 'Ubuntu'
+# END IF
+
+# IF RedHat
+- name: Install dependencies
+  package: name={{ item }} state=present
+  with_items:
+   - libxml2-devel
+   - libxslt-devel
+   - python-devel
+   - mod_ssl
+  when: ansible_os_family == 'RedHat'
+# END IF
 
 - name: Install python packages
   pip: name=lxml state=present
 
+# If Ubuntu
 - name: Install shibboleth
   package: name=libapache2-mod-shib2 state=present
   become: yes
-  register: shib
+  when: ansible_distribution == 'Ubuntu'
+  register: shib_ubuntu
+# END Ubuntu
+
+# IF RedHat
+- name: Disable SELinux
+  selinux: state=disabled
+  become: yes
+  when: ansible_os_family == 'RedHat'
+
+- name: Download Shibboleth repo
+  get_url:
+    url=http://download.opensuse.org/repositories/security://shibboleth/CentOS_7/security:shibboleth.repo
+    dest=/etc/yum.repos.d/shib.repo
+  become: yes
+  when: ansible_os_family == 'RedHat'
+
+- name: Install Shibboleth
+  package: name=shibboleth state=present
+  become: yes
+  when: ansible_os_family == 'RedHat'
+  register: shib_redhat
+# END IF
 
 - name: Configure apache
-  script: roles/federation-sp/scripts/configure_apache.py
+  script: configure_apache.py
   become: yes
-  when: shib.changed
+  when: shib_ubuntu.changed or shib_redhat.changed
 
 #FIXME: For now we can have only one IdP for each SP
 - name: Configure shibboleth
-  script: roles/federation-sp/scripts/configure_shibboleth.py
+  script: configure_shibboleth.py
   become: yes
-  when: shib.changed
+  when: shib_ubuntu.changed or shib_redhat.changed
 
+# IF Ubuntu
 - name: Shib-Keygen
   shell: shib-keygen -f
   become: yes
-  when: shib.changed
+  when: shib_ubuntu.changed and ansible_distribution == 'Ubuntu'
+# END IF
 
-- name: Configure Nova
-  script: roles/federation-sp/scripts/configure_nova.py
+# IF RedHat
+- name: Shib-Keygen
+  shell: /etc/shibboleth/shib-keygen -f
+  become: yes
+  when: shib_redhat.changed and ansible_os_family == 'RedHat'
+# END IF
 
 - name: Configure Keystone
-  script: roles/federation-sp/scripts/configure_keystone.py
+  script: configure_keystone.py
 
 - name: Restart shibd
   service: name=shibd state=restarted
 
+# IF Ubuntu
 - name: Restart apache2
   service: name=apache2 state=restarted
+  become: yes
+  when: ansible_distribution == 'Ubuntu'
+# END IF
+
+# IF RedHat
+- name: Restart httpd
+  service: name=httpd state=restarted
+  become: yes
+  when: ansible_os_family == 'RedHat'
+# END IF
 
 - name: Register identity providers
-  script: roles/federation-sp/scripts/register_identity_providers.py
-  when: shib.changed
-
+  script: register_identity_providers.py
+  when: shib_ubuntu.changed or shib_redhat.changed
 

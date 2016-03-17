@@ -1,13 +1,27 @@
 ---
 - name: Insert SAML config in keystone.conf
-  script: roles/federation-idp/scripts/configure_keystone.py {{ ansible_eth0['ipv4']['address'] }}
+  script: configure_keystone.py {{ ansible_eth0['ipv4']['address'] }}
 
 - name: Create IDP metadata
   shell: keystone-manage saml_idp_metadata > /etc/keystone/keystone_idp_metadata.xml
     creates=/etc/keystone/keystone_idp_metadata.xml
 
+# IF Ubuntu
 - name: Restart apache2
   service: name=apache2 state=restarted
+  become: yes
+  when: ansible_distribution == 'Ubuntu'
+# END IF
+
+# IF RedHat
+- name: Restart httpd
+  service: name=httpd state=restarted
+  become: yes
+  when: ansible_os_family == 'RedHat'
+# END IF
+
+- name: Configure Nova
+  script: configure_nova.py
 
 - name: Script register SPs
-  script: roles/federation-idp/scripts/register_service_providers.py
+  script: register_service_providers.py
