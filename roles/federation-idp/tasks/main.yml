@@ -25,3 +25,12 @@
 
 - name: Script register SPs
   script: register_service_providers.py
+
+- name: Update keystoneauth
+  pip: name=keystoneauth1 state=latest
+  become: yes
+
+- name: Copy test_k2k.py
+  template:
+    src=test_k2k.py.j2
+    dest=~/test_k2k.py

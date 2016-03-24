@@ -71,7 +71,7 @@
 
 # IF RedHat
 - name: Shib-Keygen
-  shell: /etc/shibboleth/shib-keygen -f
+  shell: /etc/shibboleth/keygen.sh -f
   become: yes
   when: shib_redhat.changed and ansible_os_family == 'RedHat'
 # END IF
@@ -81,6 +81,7 @@
 
 - name: Restart shibd
   service: name=shibd state=restarted
+  become: yes
 
 # IF Ubuntu
 - name: Restart apache2

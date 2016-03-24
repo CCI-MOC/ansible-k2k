@@ -1,0 +1,37 @@
+import logging
+import pprint
+import python_hosts
+
+from keystoneauth1 import identity
+from keystoneauth1.identity import v3
+from keystoneauth1 import session
+from keystoneclient import v3 as v3_client
+
+# Extract hosts information
+hosts = python_hosts.Hosts()
+
+service_providers = []
+for host in hosts.entries:
+    if host.names is not None and 'sp' in host.names[0]:
+        service_providers.append({'id': host.names[0], 'address': host.address})
+
+logging.basicConfig(level=logging.DEBUG)
+
+idp_auth = identity.Password(auth_url='http://localhost:5000',
+                             username='admin',
+                             password='{{ admin_password }}',
+                             project_name='admin',
+                             project_domain_id='default',
+                             user_domain_id='default')
+
+k2k_auth = v3.Keystone2Keystone(idp_auth,
+                                service_providers[0]['id'],
+                                project_name='admin',
+                                project_domain_id='default')
+
+sess = session.Session(auth=k2k_auth)
+
+client = v3_client.Client(session=sess,
+                          interface='public')
+
+pprint.pprint([u.name for u in client.users.list()])

@@ -16,6 +16,13 @@
     state=present
   become: yes
   when: ansible_os_family == 'RedHat'
+
+- name: Install xmlsec1-openssl
+  package: name={{ item }} state=present
+  with_items:
+   - xmlsec1-openssl
+  become: yes
+  when: ansible_os_family == 'RedHat'
 # END If Centos
 
 - name: Install xmlsec1, pip
