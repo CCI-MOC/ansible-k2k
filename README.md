@@ -3,6 +3,11 @@
 This Ansible playbook sets up two VMs (Ubuntu 14.04 or CentOS/RHEL 7) with
 DevStacks federated with K2K between them.
 
+It expects the hostname of the VMs to include the word idp for the Identity
+Provider and the word sp for the Service Provider.
+
+For example: `test-idp` and `test-sp` are valid hostnames.
+
 ## Steps
 
 Create a hosts file in the same directory with the information of the VMs.
@@ -26,4 +31,4 @@ ansible-playbook site.yml -i hosts -v
 ```
 
 SSH to the IdP and run the test_k2k.py script in the home folder. If you get a
-forbidden action because of the policy, everything works fine. 
+forbidden action because of the policy, everything works fine.
