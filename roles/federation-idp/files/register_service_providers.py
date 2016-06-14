@@ -6,11 +6,10 @@ import os, subprocess
 
 import python_hosts
 
+import keystoneclient
 from keystoneclient import session as ksc_session
 from keystoneclient.auth.identity import v3
 from keystoneclient.v3 import client as keystone_v3
-
-import keystoneauth1.exceptions.http
 
 # Source environment variables from file
 # http://stackoverflow.com/questions/3503719/emulating-bash-source-in-python
@@ -63,7 +62,7 @@ for sp in service_providers:
     try:
         client.federation.service_providers.get(sp['id'])
         #Note(knikolla): SP is already registered, skip.
-    except keystoneauth1.exceptions.http.NotFound:
+    except keystoneclient.exceptions.NotFound:
         #Note(knikolla): SP is not already registered.
         SP_url="http://" + sp['address'] + ":5000/Shibboleth.sso/SAML2/ECP"
         AUTH_url="http://" + sp['address'] + ":35357/v3/OS-FEDERATION/identity_providers/keystone-idp/protocols/saml2/auth"
