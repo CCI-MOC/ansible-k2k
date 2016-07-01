@@ -12,7 +12,7 @@
   git:
     repo=https://git.openstack.org/openstack-dev/devstack
     dest=devstack
-    version=stable/liberty
+    version=stable/mitaka
     update=no
   register: clone_devstack
 

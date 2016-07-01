@@ -21,7 +21,7 @@ for line in proc.stdout:
 proc.communicate()
 
 try:
-    OS_AUTH_URL = os.environ['OS_AUTH_URL'].strip('\n')
+    OS_AUTH_URL = os.environ['OS_AUTH_URL'].strip('\n') + "/v3"
     OS_PROJECT_ID = os.environ['OS_PROJECT_ID'].strip('\n')
     OS_USER_ID = os.environ['OS_USER_ID'].strip('\n')
     OS_PASSWORD = os.environ['OS_PASSWORD'].strip('\n')
