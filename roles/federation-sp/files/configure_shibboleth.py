@@ -42,9 +42,13 @@ OUTPUT_SHIBBOLETH2_FILE = "/etc/shibboleth/shibboleth2.xml"
 
 # Tags to be added into shibboleth-map.xml
 OPENSTACK_TAG = "{urn:mace:shibboleth:2.0:attribute-map}Attribute"
-OPENSTACK_ATTRIB = [{'name': 'openstack_user', 'id': 'openstack_user'},
-{'name': 'openstack_roles', 'id': 'openstack_roles'},
-{'name': 'openstack_project', 'id': 'openstack_project'}  ]
+OPENSTACK_ATTRIB = [
+    {'name': 'openstack_user', 'id': 'openstack_user'},
+    {'name': 'openstack_user_domain', 'id': 'openstack_user_domain'},
+    {'name': 'openstack_roles', 'id': 'openstack_roles'},
+    {'name': 'openstack_project', 'id': 'openstack_project'},
+    {'name': 'openstack_project_domain', 'id': 'openstack_project_domain'}
+]
 
 # Tags to be added into shibboleth2.xml
 SSO_NAME = "{urn:mace:shibboleth:2.0:native:sp:config}SSO"
